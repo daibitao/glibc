@@ -130,6 +130,7 @@ dso_name_valid_for_suid (const char *p)
     }
   return *p != '\0';
 }
+extern const char LD_SO_CACHE[4096] __attribute__ ((section (".ldsocache")));
 
 /* LD_AUDIT variable contents.  Must be processed before the
    audit_list below.  */
@@ -1001,12 +1002,12 @@ of this helper program; chances are you did not intend to run this program.\n\
   --list                list all dependencies and how they are resolved\n\
   --verify              verify that given object really is a dynamically linked\n\
 			object we can handle\n\
-  --inhibit-cache       Do not use " LD_SO_CACHE "\n\
+  --inhibit-cache       Do not use %s\n\
   --library-path PATH   use given PATH instead of content of the environment\n\
 			variable LD_LIBRARY_PATH\n\
   --inhibit-rpath LIST  ignore RUNPATH and RPATH information in object names\n\
 			in LIST\n\
-  --audit LIST          use objects named in LIST as auditors\n");
+  --audit LIST          use objects named in LIST as auditors\n", LD_SO_CACHE);
 
       ++_dl_skip_args;
       --_dl_argc;
