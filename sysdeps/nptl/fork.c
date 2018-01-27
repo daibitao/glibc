@@ -25,6 +25,7 @@
 #include <tls.h>
 #include <hp-timing.h>
 #include <ldsodefs.h>
+#include <libc-lock.h>
 #include <stdio-lock.h>
 #include <atomic.h>
 #include <nptl/pthreadP.h>
@@ -56,6 +57,9 @@ __libc_fork (void)
   bool multiple_threads = THREAD_GETMEM (THREAD_SELF, header.multiple_threads);
 
   __run_fork_handlers (atfork_run_prepare);
+  /* grab ld.so lock BEFORE switching to malloc_atfork */
+  __rtld_lock_lock_recursive (GL(dl_load_lock));
+  __rtld_lock_lock_recursive (GL(dl_load_write_lock));
 
   /* If we are not running multiple threads, we do not have to
      preserve lock state.  If fork runs from a signal handler, only
@@ -150,6 +154,9 @@ __libc_fork (void)
 
       /* Run the handlers registered for the parent.  */
       __run_fork_handlers (atfork_run_parent);
+      /* unlock ld.so last, because we locked it first */
+      __rtld_lock_unlock_recursive (GL(dl_load_write_lock));
+      __rtld_lock_unlock_recursive (GL(dl_load_lock));
     }
 
   return pid;
