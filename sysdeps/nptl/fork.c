@@ -130,9 +130,9 @@ __libc_fork (void)
 	  _IO_list_resetlock ();
 	}
 
-      /* Reset the lock the dynamic loader uses to protect its data.  */
+      /* Reset the locks the dynamic loader uses to protect its data.  */
       __rtld_lock_initialize (GL(dl_load_lock));
-
+      __rtld_lock_initialize (GL(dl_load_write_lock));
       /* Run the handlers registered for the child.  */
       __run_fork_handlers (atfork_run_child);
     }
