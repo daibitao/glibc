@@ -26,6 +26,10 @@
 #define flockfile(s) _IO_flockfile (s)
 #define funlockfile(s) _IO_funlockfile (s)
 
+/* __REDIRECT isn't transitive.  */
+#undef sscanf
+#define sscanf __isoc99_sscanf
+
 #undef __setmntent
 #undef __endmntent
 #undef __getmntent_r
