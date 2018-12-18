@@ -470,7 +470,7 @@ def parse(op, loc, code, start = ''):
     return loc
 
 
-def parse_output(op):
+def parse_c_output(op):
     ''' File parser.
 
     Parse the input array of lines OP and generate a tree structure to
@@ -485,7 +485,7 @@ def parse_output(op):
     return tree
 
 
-def print_tree(tree, indent):
+def print_c_tree(tree, indent):
     ''' Print the entire tree.
     '''
     if not debug:
@@ -494,7 +494,7 @@ def print_tree(tree, indent):
     if tree['type'] == block_type.macro_cond or tree['type'] == block_type.file:
         print('%sScope: %s' % (' ' * indent, tree['name']))
         for c in tree['contents']:
-            print_tree(c, indent + 4)
+            print_c_tree(c, indent + 4)
         print('%sEndScope: %s' % (' ' * indent, tree['name']))
     else:
         if tree['type'] == block_type.func:
@@ -597,6 +597,21 @@ def compare_trees(left, right, prologue = ''):
             print_changed_tree(left, 'Modified', prologue)
 
 
+parsers = {'.c':{'parse_output':parse_c_output,'print_tree':print_c_tree},
+           '.h':{'parse_output':parse_c_output,'print_tree':print_c_tree}}
+
+
+def get_parser(filename):
+    ''' Get an appropriate  parser for FILENAME.
+    '''
+    name, ext = os.path.splitext(filename)
+
+    if not ext in parsers.keys():
+        return None
+
+    return parsers[ext]
+
+
 def analyze_diff(oldfile, newfile, filename):
     ''' Parse the output of the old and new files and print the difference.
 
@@ -604,17 +619,13 @@ def analyze_diff(oldfile, newfile, filename):
     trees for them and compare them.  We limit our comparison to only C source
     files.
     '''
-    split = filename.split('.')
-    ext = ''
-    if split:
-        ext = split[-1]
+    parser = get_parser(filename)
 
-    if ext != 'c' and ext != 'h':
+    if not parser:
         return
 
-    debug_print('\t<List diff between oldfile and newfile>')
-    # op = exec_git_cmd(['diff', '-U20000', oldfile, newfile])
-    # (left, right) = parse_output(op)
+    parse_output = parser['parse_output']
+    print_tree = parser['print_tree']
 
     left = parse_output(exec_git_cmd(['show', oldfile]))
     right = parse_output(exec_git_cmd(['show', newfile]))
@@ -738,11 +749,17 @@ def main(revs):
 def parser_file_test(f):
     ''' Parser debugger Entry Point
     '''
+    parser = get_parser(f)
+
+    if not parser:
+        debug_print('%s: No parser for this file type, cannot debug' % f)
+        return
+
     with open(f) as srcfile:
         op = srcfile.readlines()
         op = [x[:-1] for x in op]
-        tree = parse_output(op)
-        print_tree(tree, 0)
+        tree = parser['parse_output'](op)
+        parser['print_tree'](tree, 0)
 
 
 # Program Entry point.  If -d is specified, the second argument is assumed to be
