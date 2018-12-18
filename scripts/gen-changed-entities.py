@@ -133,6 +133,30 @@ class block_type(Enum):
     assign = 12
 
 
+actions = {0:{'new': 'New', 'mod': 'Modified', 'del': 'Remove'},
+           block_type.file:{'new': 'New file', 'mod': 'Modified file',
+                            'del': 'Remove file'},
+           block_type.macro_cond:{'new': 'New', 'mod': 'Modified',
+                                  'del': 'Remove'},
+           block_type.macro_def:{'new': 'New macro', 'mod': 'Modified macro',
+                                 'del': 'Remove macro'},
+           block_type.macro_undef:{'new': 'Undefine', 'mod': 'Modified',
+                                   'del': 'Remove'},
+           block_type.macro_include:{'new': 'Include file', 'mod': 'Modified',
+                                     'del': 'Remove include'},
+           block_type.macro_info:{'new': 'New preprocessor message',
+                                  'mod': 'Modified', 'del': 'Remove'},
+           block_type.decl:{'new': 'New', 'mod': 'Modified', 'del': 'Remove'},
+           block_type.func:{'new': 'New function', 'mod': 'Modified function',
+                 'del': 'Remove function'},
+           block_type.composite:{'new': 'New', 'mod': 'Modified',
+                                 'del': 'Remove'},
+           block_type.macrocall:{'new': 'New', 'mod': 'Modified',
+                                 'del': 'Remove'},
+           block_type.fndecl:{'new': 'New function', 'mod': 'Modified',
+                              'del': 'Remove'},
+           block_type.assign:{'new': 'New', 'mod': 'Modified', 'del': 'Remove'}}
+
 #------------------------------------------------------------------------------
 # C Parser.
 #------------------------------------------------------------------------------
@@ -585,16 +609,16 @@ def compare_trees(left, right, prologue = ''):
                     found = True
                     break
             if not found:
-                print_changed_tree(cl, 'Removed', prologue)
+                print_changed_tree(cl, actions[cl['type']]['del'], prologue)
 
         # ... and vice versa.  This time we only need to look at unmatched
         # contents.
         for cr in right['contents']:
             if not cr['matched']:
-                print_changed_tree(cr, 'New', prologue)
+                print_changed_tree(cr, actions[cr['type']]['new'], prologue)
     else:
         if left['contents'] != right['contents']:
-            print_changed_tree(left, 'Modified', prologue)
+            print_changed_tree(left, actions[left['type']]['mod'], prologue)
 
 
 parsers = {'.c':{'parse_output':parse_c_output,'print_tree':print_c_tree},
