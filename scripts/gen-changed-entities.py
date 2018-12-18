@@ -148,13 +148,13 @@ FUNC_RE = re.compile(ATTRIBUTE + r'*\s*(\w+)\s*\([^(][^{]+\)\s*{')
 # The macrocall_re peeks into the next line to ensure that it doesn't eat up
 # a FUNC by accident.  The func_re regex is also quite crude and only
 # intends to ensure that the function name gets picked up correctly.
-MACROCALL_RE = re.compile(r'(\w+)\s*\(\w+(\s*,\s*[\w\.]+)*\)$')
+MACROCALL_RE = re.compile(r'(\w+)\s*\((?!void).(\s*,\s*[\w\.]+)*\)$')
 
 # Composite types such as structs and unions.
 COMPOSITE_RE = re.compile(r'(struct|union|enum)\s*(\w*)\s*{')
 
 # Static assignments.
-ASSIGN_RE = re.compile(r'(\w+)\s*(\[[^\]]*\])?\s*([^\s]*attribute[\s\w()]+)?\s*=')
+ASSIGN_RE = re.compile(r'(\w+)\s*(\[[^\]]*\])*\s*([^\s]*attribute[\s\w()]+)?\s*=')
 
 # Function Declarations.
 FNDECL_RE = re.compile(r'(\w+)\s*\([^;]+\)\s*' + ATTRIBUTE + '*;')
